@@ -1,967 +1,1037 @@
 import { useState, useEffect, useRef } from "react";
 
-const NAV_LINKS = ["About", "Skills", "Projects", "Experience", "Contact"];
+/* ══════════════════ PALETTE — No Gradients ══════════════════ */
+const C = {
+  bg:        "#0F172A",
+  bgSec:     "#111827",
+  card:      "#1E293B",
+  cardHov:   "#253447",
+  accent:    "#3B82F6",
+  accentLt:  "#93C5FD",
+  accentDk:  "#2563EB",
+  green:     "#22C55E",
+  greenDk:   "#16A34A",
+  textPri:   "#E5E7EB",
+  textSec:   "#9CA3AF",
+  textMut:   "#6B7280",
+  border:    "rgba(59,130,246,0.12)",
+  borderHov: "rgba(59,130,246,0.38)",
+  shadow:    "0 4px 24px rgba(0,0,0,.55)",
+  shadowBlue:"0 8px 32px rgba(59,130,246,.18)",
+};
+
+/* ══════════════════ DATA ══════════════════ */
+const NAV_LINKS   = ["About","Skills","Projects","Experience","Contact"];
+const TYPED_ROLES = ["Business Analyst","QA Specialist","CS Undergraduate"];
+
+const DI = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
+const TECH_SKILLS = [
+  { name:"Java",        logo:`${DI}/java/java-original.svg` },
+  { name:"Python",      logo:`${DI}/python/python-original.svg` },
+  { name:"MySQL / SQL", logo:`${DI}/mysql/mysql-original.svg` },
+  { name:"JavaScript",  logo:`${DI}/javascript/javascript-original.svg` },
+  { name:"HTML5",       logo:`${DI}/html5/html5-original.svg` },
+  { name:"CSS3",        logo:`${DI}/css3/css3-original.svg` },
+  { name:"Git",         logo:`${DI}/git/git-original.svg` },
+  { name:"Selenium",    logo:`${DI}/selenium/selenium-original.svg` },
+  { name:"Jira",        logo:`${DI}/jira/jira-original.svg` },
+  { name:"Postman",     logo:`${DI}/postman/postman-original.svg` },
+  { name:"MS Excel",    logo:null, abbr:"XLS" },
+  { name:"Confluence",  logo:`${DI}/confluence/confluence-original.svg` },
+];
+
+const TOOLS = [
+  "Agile / Scrum","CI/CD","Unit Testing","Integration Testing",
+  "System Testing","Requirements Engineering","Business Analysis",
+  "Stakeholder Communication","Encryption","Cross-platform Dev","Networking",
+];
+
+const SOFT_SKILLS = [
+  { name:"Critical Thinking",   pct:90 },
+  { name:"Time Management",     pct:85 },
+  { name:"Team Collaboration",  pct:88 },
+  { name:"Problem Solving",     pct:92 },
+];
 
 const PROJECTS = [
-  {
-    id: 1,
-    title: "Team Vertex — Project Manager",
-    tag: "Leadership",
-    year: "2024",
-    description:
-      "Led a cross-functional development team to successfully hit a 90% project milestone, optimising workflow transparency and collaboration. Gathered requirements, managed timelines, and facilitated smooth sprint delivery.",
-    tech: ["Agile", "Jira", "Project Management", "Stakeholder Comm."],
-    color: "#b8f0c8",
-  },
-  {
-    id: 2,
-    title: "Predictive Analytics Engine — LCH",
-    tag: "Data / Analytics",
-    year: "2024",
-    description:
-      "Developed an analytics engine to forecast facility wait times for Live Campus Hub, directly streamlining campus traffic and boosting student engagement. Translated complex data insights into actionable project requirements.",
-    tech: ["Python", "SQL", "Data Analysis", "Requirements Engineering"],
-    color: "#b8dff0",
-  },
-  {
-    id: 3,
-    title: "QA Test Automation Suite",
-    tag: "Quality Assurance",
-    year: "2024",
-    description:
-      "Designed and implemented a comprehensive test automation suite covering unit, integration, and system testing layers. Reduced manual regression time by 40% and improved defect detection rate significantly.",
-    tech: ["Java", "JUnit", "Selenium", "CI/CD"],
-    color: "#f0e4b8",
-  },
-  {
-    id: 4,
-    title: "Campus Resource Booking System",
-    tag: "Full Stack",
-    year: "2025",
-    description:
-      "Built a full-stack room and resource booking platform for university students. Features real-time availability, conflict detection, and admin dashboard with reporting capabilities.",
-    tech: ["Java", "Python", "SQL", "MS Excel"],
-    color: "#f0b8d4",
-  },
-  {
-    id: 5,
-    title: "Encrypted File Transfer Tool",
-    tag: "Security",
-    year: "2025",
-    description:
-      "Implemented a cross-platform CLI tool for secure file transfer with AES-256 encryption. Supports Windows and Linux, with logging, integrity verification, and batch processing.",
-    tech: ["Python", "Encryption", "Cross-platform", "OS"],
-    color: "#d4b8f0",
-  },
+  { id:1, title:"Team Vertex — Project Manager",     tag:"Leadership",       year:"2024",
+    description:"Led a cross-functional team to a 90% project milestone, optimising workflow transparency and sprint delivery.",
+    tech:["Agile","Jira","Project Management","Stakeholder Comm."], color:"#3B82F6", icon:"👥" },
+  { id:2, title:"Predictive Analytics Engine — LCH", tag:"Data / Analytics", year:"2024",
+    description:"Built an analytics engine to forecast campus facility wait times for Live Campus Hub, streamlining traffic and boosting engagement.",
+    tech:["Python","SQL","Data Analysis","Requirements Engineering"], color:"#22C55E", icon:"📊" },
+  { id:3, title:"QA Test Automation Suite",          tag:"Quality Assurance", year:"2024",
+    description:"Designed a full test automation suite across unit, integration, and system layers. Cut manual regression time by 40%.",
+    tech:["Java","JUnit","Selenium","CI/CD"], color:"#F59E0B", icon:"🧪" },
+  { id:4, title:"Campus Resource Booking System",    tag:"Full Stack",        year:"2025",
+    description:"Room and resource booking platform with real-time availability, conflict detection, and an admin reporting dashboard.",
+    tech:["Java","Python","SQL","MS Excel"], color:"#8B5CF6", icon:"🏛" },
+  { id:5, title:"Encrypted File Transfer Tool",      tag:"Security",         year:"2025",
+    description:"Cross-platform CLI tool for AES-256 secure file transfer with integrity verification and batch processing.",
+    tech:["Python","Encryption","Cross-platform","OS"], color:"#EC4899", icon:"🔒" },
 ];
 
-const SKILLS = [
-  { group: "Languages", items: ["Java", "Python", "SQL", "JavaScript", "HTML", "CSS"] },
-  { group: "Tools", items: ["MS Excel", "Git", "Jira", "Postman", "Selenium", "Confluence"] },
-  {
-    group: "Testing",
-    items: ["Unit Testing", "Integration Testing", "System Testing"],
-  },
-  {
-    group: "Domain",
-    items: [
-      "Project Management",
-      "Business Analysis",
-      "Networking Basics",
-      "Encryption",
-      "Operating Systems",
-      "Cross-platform Software",
-    ],
-  },
-  { group: "Soft Skills", items: ["Critical Thinking", "Time Management"] },
+const EXPERIENCE = [
+  { year:"Present",      role:"Quality Assurance Technician",  org:"Global Solutions International Pvt Ltd", type:"Work",        color:"#22C55E",
+    desc:"Executing testing strategies across unit, integration, and system layers to ensure software quality and reliability." },
+  { year:"2024–Present", role:"B.Sc. (Hons) Computer Science", org:"University of Wolverhampton",            type:"Education",   color:"#3B82F6",
+    desc:"Honours degree focused on software engineering, data structures, and systems design." },
+  { year:"2023",         role:"Engineering Foundation Program", org:"CINEC Campus",                           type:"Education",   color:"#3B82F6",
+    desc:"Intensive foundation covering mathematics, physics, and programming fundamentals." },
+  { year:"2023",         role:"English Certificate Course",    org:"Aquinas College",                        type:"Certificate", color:"#F59E0B",
+    desc:"Certified English proficiency course focusing on professional and academic communication." },
+  { year:"Current",      role:"English Certificate Course",    org:"British Council",                        type:"Certificate", color:"#F59E0B",
+    desc:"Ongoing advanced English language training with the British Council." },
 ];
 
-function useInView(threshold = 0.15) {
+/* ══════════════════ HOOKS ══════════════════ */
+function useInView(threshold = 0.12) {
   const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
+  const [vis, setVis] = useState(false);
   useEffect(() => {
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } },
       { threshold }
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, [threshold]);
-  return [ref, visible];
+  return [ref, vis];
 }
 
-function FadeIn({ children, delay = 0, className = "", style = {} }) {
+function useViewport() {
+  const [w, setW] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
+  useEffect(() => {
+    const h = () => setW(window.innerWidth);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
+  return { isMobile: w < 640, isTablet: w < 980, width: w };
+}
+
+/* ══════════════════ PRIMITIVES ══════════════════ */
+function FadeIn({ children, delay = 0, style = {} }) {
   const [ref, vis] = useInView();
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: vis ? 1 : 0,
-        transform: vis ? "translateY(0)" : "translateY(32px)",
-        transition: `opacity 0.7s ease ${delay}s, transform 0.7s ease ${delay}s`,
-        ...style,
-      }}
-    >
+    <div ref={ref} style={{
+      opacity: vis ? 1 : 0,
+      transform: vis ? "translateY(0)" : "translateY(26px)",
+      transition: `opacity .65s ease ${delay}s, transform .65s ease ${delay}s`,
+      ...style,
+    }}>
       {children}
     </div>
   );
 }
 
-export default function Portfolio() {
-  const [activeSection, setActiveSection] = useState("About");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeProject, setActiveProject] = useState(null);
-  const [copied, setCopied] = useState(false);
+function Btn({ children, onClick, href, variant = "primary" }) {
+  const [h, setH] = useState(false);
+  const base = {
+    display:"inline-flex", alignItems:"center", gap:".45rem",
+    borderRadius:"9px", cursor:"pointer",
+    fontFamily:"'Inter',system-ui,sans-serif", fontSize:".88rem", fontWeight:"600",
+    padding:".75rem 1.75rem", textDecoration:"none", whiteSpace:"nowrap",
+    transition:"all .22s ease",
+  };
+  const styles = {
+    primary: {
+      ...base, border:"none",
+      background: h ? C.accentDk : C.accent,
+      color:"#fff",
+      boxShadow: h ? "0 8px 24px rgba(59,130,246,.38)" : "0 3px 12px rgba(59,130,246,.22)",
+      transform: h ? "translateY(-2px)" : "none",
+    },
+    ghost: {
+      ...base,
+      background: h ? "rgba(59,130,246,.1)" : "transparent",
+      border: `1.5px solid ${h ? C.accent : "rgba(59,130,246,.3)"}`,
+      color: h ? C.accentLt : C.textSec,
+      transform: h ? "translateY(-2px)" : "none",
+    },
+  };
+  const p = { onMouseEnter:()=>setH(true), onMouseLeave:()=>setH(false), style:styles[variant] };
+  return href ? <a href={href} {...p}>{children}</a> : <button onClick={onClick} {...p}>{children}</button>;
+}
 
+/* ══════════════════ ICONS ══════════════════ */
+const GithubIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17">
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+  </svg>
+);
+const LinkedInIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17">
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+  </svg>
+);
+const MailIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="17" height="17">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+    <polyline points="22,6 12,13 2,6"/>
+  </svg>
+);
+const PhoneIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="17" height="17">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.48-1.48a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+);
+const PinIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="17" height="17">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+    <circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+
+/* ══════════════════ COMPONENTS ══════════════════ */
+
+function TypedText({ roles }) {
+  const [idx, setIdx] = useState(0);
+  const [text, setText] = useState("");
+  const [del, setDel] = useState(false);
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = NAV_LINKS.map((n) => ({
-        id: n,
-        el: document.getElementById(n),
-      }));
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = sections[i].el;
-        if (el && window.scrollY >= el.offsetTop - 120) {
-          setActiveSection(sections[i].id);
-          break;
-        }
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    setMenuOpen(false);
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText("nithirapeiris.me@gmail.com");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
+    const full = roles[idx];
+    let t;
+    if (!del && text.length < full.length)        t = setTimeout(() => setText(full.slice(0, text.length+1)), 80);
+    else if (!del && text.length === full.length)  t = setTimeout(() => setDel(true), 2200);
+    else if (del && text.length > 0)               t = setTimeout(() => setText(full.slice(0, text.length-1)), 44);
+    else { setDel(false); setIdx(i => (i+1) % roles.length); }
+    return () => clearTimeout(t);
+  }, [text, del, idx, roles]);
   return (
-    <div style={styles.root}>
-      {/* ── NAV ── */}
-      <nav style={styles.nav}>
-        <span style={styles.navLogo} onClick={() => scrollTo("About")}>ND</span>
-        <div style={styles.navLinks}>
-          {NAV_LINKS.map((l) => (
-            <button
-              key={l}
-              onClick={() => scrollTo(l)}
-              style={{
-                ...styles.navLink,
-                ...(activeSection === l ? styles.navLinkActive : {}),
-              }}
-            >
-              {l}
-            </button>
+    <span>
+      <span style={{ color: C.accentLt }}>{text}</span>
+      <span style={{ animation:"blink 1s step-end infinite", color:C.accentLt }}>|</span>
+    </span>
+  );
+}
+
+function ProfilePhoto() {
+  return (
+    <div style={{ position:"relative", display:"flex", alignItems:"center", justifyContent:"flex-end", padding:"24px", paddingRight:0 }}>
+      {/* outer faint ring */}
+      <div style={{
+        position:"absolute",
+        width:390, height:390, borderRadius:"50%",
+        border:`1px solid rgba(59,130,246,.2)`,
+        right:"-12px",
+      }}/>
+      {/* inner accent ring */}
+      <div style={{
+        position:"absolute",
+        width:356, height:356, borderRadius:"50%",
+        border:`2px solid ${C.accent}`, opacity:.35,
+        right:"-12px",
+      }}/>
+      <img
+        src="https://i.pravatar.cc/320?img=11"
+        alt="Profile"
+        style={{
+          width:332, height:332, borderRadius:"50%",
+          objectFit:"cover",
+          border:`6px solid ${C.bg}`,
+          boxShadow:`0 24px 64px rgba(0,0,0,.6)`,
+          display:"block", position:"relative", zIndex:1,
+        }}
+      />
+      {/* green dot */}
+      <div style={{
+        position:"absolute", bottom:38, right:12, zIndex:2,
+        width:22, height:22, borderRadius:"50%",
+        background:C.green, border:`4px solid ${C.bg}`,
+      }}/>
+    </div>
+  );
+}
+
+function SocialBtn({ icon, href }) {
+  const [h, setH] = useState(false);
+  return (
+    <a href={href} target="_blank" rel="noreferrer"
+      onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
+      style={{
+        display:"flex", alignItems:"center", justifyContent:"center",
+        width:38, height:38, borderRadius:"8px",
+        background: h ? "rgba(59,130,246,.15)" : C.card,
+        border:`1px solid ${h ? C.accent : C.border}`,
+        color: h ? C.accentLt : C.textSec,
+        textDecoration:"none",
+        transform: h ? "translateY(-2px)" : "none",
+        transition:"all .22s ease",
+      }}
+    >{icon}</a>
+  );
+}
+
+function SectionHead({ eyebrow, title, highlight, desc }) {
+  return (
+    <div style={{ textAlign:"center", marginBottom:"3.5rem" }}>
+      <div style={{
+        display:"inline-flex", alignItems:"center", gap:".65rem",
+        color:C.accent, fontSize:".68rem", fontWeight:"700",
+        letterSpacing:"3px", textTransform:"uppercase", marginBottom:".9rem",
+      }}>
+        <span style={{ width:22, height:1.5, background:C.accent, display:"inline-block", opacity:.5 }}/>
+        {eyebrow}
+        <span style={{ width:22, height:1.5, background:C.accent, display:"inline-block", opacity:.5 }}/>
+      </div>
+      <h2 style={{
+        fontSize:"clamp(1.9rem,4vw,2.6rem)", fontWeight:"800",
+        color:C.textPri, letterSpacing:"-.025em", lineHeight:1.15,
+        fontFamily:"'Inter',system-ui",
+      }}>
+        {title}{" "}
+        {highlight && <span style={{ color:C.accent }}>{highlight}</span>}
+      </h2>
+      {desc && <p style={{ color:C.textMut, fontSize:".93rem", maxWidth:"480px", margin:".75rem auto 0", lineHeight:1.8 }}>{desc}</p>}
+    </div>
+  );
+}
+
+function TechCard({ skill }) {
+  const [h, setH] = useState(false);
+  return (
+    <div onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{
+      alignItems:"center",
+      background: h ? C.cardHov : C.card,
+      border:`1px solid ${h ? C.borderHov : C.border}`,
+      borderRadius:"12px",
+      boxShadow: h ? C.shadowBlue : "none",
+      cursor:"default",
+      display:"flex", flexDirection:"column", gap:".65rem",
+      overflow:"hidden", padding:"1.3rem .75rem",
+      position:"relative", textAlign:"center",
+      transition:"all .25s ease",
+    }}>
+      <div style={{
+        position:"absolute", bottom:0, left:0, right:0, height:2,
+        background:C.accent,
+        transform: h ? "scaleX(1)" : "scaleX(0)", transformOrigin:"left",
+        transition:"transform .25s ease",
+      }}/>
+      {skill.logo
+        ? <img src={skill.logo} alt={skill.name} width={36} height={36} style={{ objectFit:"contain" }} draggable="false"/>
+        : <span style={{ fontSize:".9rem", fontWeight:"800", color:C.accentLt, fontFamily:"'Inter',system-ui" }}>{skill.abbr}</span>
+      }
+      <div style={{ fontSize:".72rem", fontWeight:"600", color:C.textSec, lineHeight:1.3 }}>{skill.name}</div>
+    </div>
+  );
+}
+
+function ToolPill({ label }) {
+  const [h, setH] = useState(false);
+  return (
+    <span onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{
+      display:"inline-flex", alignItems:"center",
+      background: h ? C.cardHov : C.card,
+      border:`1px solid ${h ? C.borderHov : C.border}`,
+      borderRadius:"30px",
+      color: h ? C.textPri : C.textSec,
+      cursor:"default", fontSize:".8rem", fontWeight:"500",
+      padding:".42rem .9rem",
+      transition:"all .2s ease",
+    }}>{label}</span>
+  );
+}
+
+function SoftCard({ skill }) {
+  const [ref, vis] = useInView(0.2);
+  const [h, setH] = useState(false);
+  return (
+    <div ref={ref} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{
+      background: h ? C.cardHov : C.card,
+      border:`1px solid ${h ? C.borderHov : C.border}`,
+      borderRadius:"12px", padding:"1.25rem 1.4rem",
+      transition:"all .25s ease",
+      boxShadow: h ? C.shadowBlue : "none",
+    }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:".9rem" }}>
+        <span style={{ color:C.textPri, fontSize:".87rem", fontWeight:"600" }}>{skill.name}</span>
+        <span style={{
+          background:"rgba(59,130,246,.1)", border:`1px solid rgba(59,130,246,.22)`,
+          borderRadius:"20px", color:C.accentLt,
+          fontSize:".68rem", fontWeight:"700", padding:".16rem .58rem",
+        }}>{skill.pct}%</span>
+      </div>
+      <div style={{ background:"rgba(59,130,246,.1)", borderRadius:4, height:5, overflow:"hidden" }}>
+        <div style={{
+          background:C.accent, borderRadius:4, height:"100%",
+          width: vis ? `${skill.pct}%` : "0%",
+          transition:"width 1s ease .3s",
+        }}/>
+      </div>
+    </div>
+  );
+}
+
+function ProjectCard({ project, onDetails }) {
+  const [h, setH] = useState(false);
+  return (
+    <div onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{
+      background:C.card,
+      border:`1px solid ${h ? C.borderHov : C.border}`,
+      borderRadius:"16px", overflow:"hidden",
+      display:"flex", flexDirection:"column",
+      boxShadow: h ? "0 20px 48px rgba(0,0,0,.45)" : "none",
+      transition:"border-color .28s, box-shadow .28s",
+      height:"100%",
+    }}>
+      {/* banner */}
+      <div style={{
+        height:170, flexShrink:0, position:"relative", overflow:"hidden",
+        background:`${C.bgSec}`,
+      }}>
+        <div style={{
+          position:"absolute", inset:0,
+          backgroundImage:"radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px)",
+          backgroundSize:"20px 20px",
+        }}/>
+        <div style={{
+          position:"absolute", inset:0,
+          display:"flex", alignItems:"center", justifyContent:"center",
+          fontSize:"3.8rem", opacity:.11,
+          transform: h ? "scale(1.08)" : "scale(1)",
+          transition:"transform .45s ease",
+        }}>{project.icon}</div>
+        <div style={{
+          position:"absolute", bottom:0, left:0, right:0, height:"60%",
+          background:`linear-gradient(to bottom,transparent,${C.card})`,
+        }}/>
+        <div style={{
+          position:"absolute", top:0, left:0, right:0, height:3,
+          background:project.color,
+          opacity: h ? 1 : 0.5, transition:"opacity .28s",
+        }}/>
+        <div style={{
+          position:"absolute", top:".8rem", right:".8rem",
+          background:"rgba(15,23,42,.85)", backdropFilter:"blur(8px)",
+          border:`1px solid rgba(255,255,255,.08)`,
+          borderRadius:"20px", color:C.textSec,
+          fontSize:".6rem", fontWeight:"700", letterSpacing:".5px",
+          padding:".22rem .6rem", textTransform:"uppercase",
+        }}>{project.tag}</div>
+      </div>
+
+      <div style={{ padding:"1.25rem 1.3rem", display:"flex", flexDirection:"column", gap:".5rem", flex:1 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+          <h3 style={{ fontSize:".94rem", fontWeight:"700", color:C.textPri, lineHeight:1.35, fontFamily:"'Inter',system-ui", margin:0, flex:1, paddingRight:".5rem" }}>
+            {project.title}
+          </h3>
+          <span style={{ fontSize:".67rem", color:C.textMut, fontFamily:"monospace", flexShrink:0, paddingTop:"2px" }}>{project.year}</span>
+        </div>
+        <p style={{ fontSize:".82rem", color:C.textMut, lineHeight:1.75, margin:0, flex:1 }}>{project.description}</p>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:".32rem", marginTop:".2rem" }}>
+          {project.tech.map(t => (
+            <span key={t} style={{
+              background:"rgba(59,130,246,.07)", border:"1px solid rgba(59,130,246,.16)",
+              borderRadius:"20px", color:C.accentLt,
+              fontSize:".64rem", fontWeight:"600", padding:".16rem .55rem",
+            }}>{t}</span>
           ))}
         </div>
-        <button style={styles.burger} onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? "✕" : "☰"}
-        </button>
-      </nav>
-      {menuOpen && (
-        <div style={styles.mobileMenu}>
-          {NAV_LINKS.map((l) => (
-            <button key={l} style={styles.mobileLink} onClick={() => scrollTo(l)}>
-              {l}
-            </button>
-          ))}
-        </div>
-      )}
+      </div>
 
-      {/* ── HERO ── */}
-      <section id="About" style={styles.hero}>
-        <div style={styles.heroBg} />
-        <div style={styles.heroContent}>
-          <div style={styles.heroTag}>Business Analyst · QA Specialist</div>
-          <h1 style={styles.heroName}>
-            Nithira<br />Dinujaya
-          </h1>
-          <p style={styles.heroSub}>
-            CS undergraduate at University of Wolverhampton. I bridge the gap
-            between business requirements and technical execution — with a sharp
-            eye for quality and a love for clean systems.
-          </p>
-          <div style={styles.heroActions}>
-            <button style={styles.btnPrimary} onClick={() => scrollTo("Projects")}>
-              View Projects
-            </button>
-            <button style={styles.btnGhost} onClick={() => scrollTo("Contact")}>
-              Get in Touch
-            </button>
-          </div>
-          <div style={styles.heroMeta}>
-            <span>📍 Ragama, Sri Lanka</span>
-            <span>🎓 Wolverhampton · 2024–present</span>
-            <span>💼 QA @ Global Solutions</span>
-          </div>
-        </div>
-        <div style={styles.heroArt}>
-          <div style={styles.artCircle1} />
-          <div style={styles.artCircle2} />
-          <div style={styles.artInitials}>ND</div>
-        </div>
-      </section>
+      <div style={{ borderTop:`1px solid ${C.border}`, padding:".7rem 1.3rem", display:"flex", justifyContent:"flex-end", flexShrink:0 }}>
+        <ViewBtn onClick={onDetails}/>
+      </div>
+    </div>
+  );
+}
 
-      {/* ── SKILLS ── */}
-      <section id="Skills" style={styles.section}>
-        <FadeIn>
-          <div style={styles.sectionHeader}>
-            <span style={styles.sectionNum}>01</span>
-            <h2 style={styles.sectionTitle}>Skills & Tools</h2>
-          </div>
-        </FadeIn>
-        <div style={styles.skillsGrid}>
-          {SKILLS.map((grp, gi) => (
-            <FadeIn key={grp.group} delay={gi * 0.08} style={{ height: "100%" }}>
-              <div style={styles.skillCard}>
-                <div style={styles.skillGroup}>{grp.group}</div>
-                <div style={styles.skillItems}>
-                  {grp.items.map((item) => (
-                    <span key={item} style={styles.skillPill}>{item}</span>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
+function ViewBtn({ onClick }) {
+  const [h, setH] = useState(false);
+  return (
+    <button onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{
+      display:"inline-flex", alignItems:"center", gap:".38rem",
+      background: h ? "rgba(59,130,246,.1)" : "transparent",
+      border:`1px solid ${h ? C.accent : C.border}`,
+      borderRadius:"7px", color: h ? C.accentLt : C.textSec,
+      cursor:"pointer", fontSize:".77rem", fontWeight:"600",
+      padding:".35rem .85rem", transition:"all .2s ease",
+      fontFamily:"'Inter',system-ui",
+    }}>
+      View Details
+      <span style={{ transform: h ? "translateX(3px)" : "none", display:"inline-block", transition:"transform .2s" }}>→</span>
+    </button>
+  );
+}
 
-      {/* ── PROJECTS ── */}
-      <section id="Projects" style={{ ...styles.section, background: "#0d0d0d" }}>
-        <FadeIn>
-          <div style={styles.sectionHeader}>
-            <span style={styles.sectionNum}>02</span>
-            <h2 style={styles.sectionTitle}>Projects</h2>
-          </div>
-        </FadeIn>
-        <div style={styles.projectsGrid}>
-          {PROJECTS.map((p, i) => (
-            <FadeIn key={p.id} delay={i * 0.07} style={{ height: "100%" }}>
-              <div
-                style={{
-                  ...styles.projectCard,
-                  borderTop: `3px solid ${p.color}`,
-                }}
-                onClick={() => setActiveProject(p)}
-              >
-                <div style={styles.projectTop}>
-                  <span style={{ ...styles.projectTag, color: p.color }}>{p.tag}</span>
-                  <span style={styles.projectYear}>{p.year}</span>
-                </div>
-                <h3 style={styles.projectTitle}>{p.title}</h3>
-                <p style={styles.projectDesc}>{p.description.slice(0, 110)}…</p>
-                <div style={styles.techRow}>
-                  {p.tech.slice(0, 3).map((t) => (
-                    <span key={t} style={styles.techChip}>{t}</span>
-                  ))}
-                  {p.tech.length > 3 && (
-                    <span style={styles.techChip}>+{p.tech.length - 3}</span>
-                  )}
-                </div>
-                <div style={{ ...styles.viewMore, color: p.color }}>
-                  View details →
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* ── EXPERIENCE / EDUCATION ── */}
-      <section id="Experience" style={styles.section}>
-        <FadeIn>
-          <div style={styles.sectionHeader}>
-            <span style={styles.sectionNum}>03</span>
-            <h2 style={styles.sectionTitle}>Experience & Education</h2>
-          </div>
-        </FadeIn>
-        <div style={styles.timeline}>
-          {[
-            {
-              year: "Present",
-              role: "Quality Assurance Technician",
-              org: "Global Solutions International Pvt Ltd",
-              type: "work",
-              desc: "Executing comprehensive testing strategies across unit, integration, and system layers to ensure software quality and reliability.",
-            },
-            {
-              year: "2024 – Present",
-              role: "B.Sc. (Hons) in Computer Science",
-              org: "University of Wolverhampton",
-              type: "edu",
-              desc: "Pursuing honours degree with focus on software engineering, data structures, and systems design.",
-            },
-            {
-              year: "2023",
-              role: "Engineering Foundation Program",
-              org: "CINEC Campus",
-              type: "edu",
-              desc: "Completed intensive engineering foundation covering mathematics, physics, and programming fundamentals.",
-            },
-            {
-              year: "2023",
-              role: "English Certificate Course",
-              org: "Aquinas College",
-              type: "cert",
-              desc: "Certified English proficiency course focusing on professional and academic communication.",
-            },
-            {
-              year: "Current",
-              role: "English Certificate Course",
-              org: "British Council",
-              type: "cert",
-              desc: "Ongoing advanced English language training with the British Council.",
-            },
-          ].map((item, i) => (
-            <FadeIn key={i} delay={i * 0.1}>
-              <div style={styles.timelineItem}>
-                <div style={styles.timelineDot}>
-                  <span style={styles.timelineDotInner} />
-                </div>
-                <div style={styles.timelineBody}>
-                  <div style={styles.timelineYear}>{item.year}</div>
-                  <div style={styles.timelineRole}>{item.role}</div>
-                  <div style={styles.timelineOrg}>{item.org}</div>
-                  <p style={styles.timelineDesc}>{item.desc}</p>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CONTACT ── */}
-      <section id="Contact" style={{ ...styles.section, background: "#0d0d0d" }}>
-        <FadeIn>
-          <div style={styles.sectionHeader}>
-            <span style={styles.sectionNum}>04</span>
-            <h2 style={styles.sectionTitle}>Get In Touch</h2>
-          </div>
-        </FadeIn>
-        <FadeIn delay={0.1}>
-          <div style={styles.contactCard}>
-            <p style={styles.contactIntro}>
-              Whether you're looking for a QA specialist, business analyst, or a
-              collaborative project partner — I'd love to connect.
-            </p>
-            <div style={styles.contactItems}>
-              <div style={styles.contactRow}>
-                <span style={styles.contactIcon}>📧</span>
-                <span style={styles.contactVal}>nithirapeiris.me@gmail.com</span>
-                <button style={styles.copyBtn} onClick={handleCopy}>
-                  {copied ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <div style={styles.contactRow}>
-                <span style={styles.contactIcon}>📞</span>
-                <span style={styles.contactVal}>+94 766 678 127</span>
-              </div>
-              <div style={styles.contactRow}>
-                <span style={styles.contactIcon}>📍</span>
-                <span style={styles.contactVal}>495/1 Heenkenda, Ragama, Sri Lanka</span>
-              </div>
-            </div>
-            <div style={styles.contactActions}>
-              <a
-                href="mailto:nithirapeiris.me@gmail.com"
-                style={styles.btnPrimary}
-              >
-                Send Email
-              </a>
-            </div>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* ── FOOTER ── */}
-      <footer style={styles.footer}>
-        <span style={styles.footerLogo}>ND</span>
-        <span style={styles.footerText}>
-          © 2025 Nithira Dinujaya · Built with passion
-        </span>
-      </footer>
-
-      {/* ── PROJECT MODAL ── */}
-      {activeProject && (
-        <div style={styles.modalOverlay} onClick={() => setActiveProject(null)}>
-          <div
-            style={{
-              ...styles.modal,
-              borderTop: `4px solid ${activeProject.color}`,
+function ExpTimeline() {
+  return (
+    <div style={{ position:"relative", paddingLeft:"2.25rem" }}>
+      <div style={{
+        position:"absolute", left:"7px", top:10, bottom:0,
+        width:2, background:C.accent, opacity:.3,
+      }}/>
+      {EXPERIENCE.map((item, i) => (
+        <FadeIn key={i} delay={i*.08}>
+          <div style={{ position:"relative", marginBottom:"1.6rem" }}>
+            <div style={{
+              position:"absolute", left:"-2.25rem", top:13,
+              width:13, height:13, borderRadius:"50%",
+              background:item.color, border:`3px solid ${C.bgSec}`,
+            }}/>
+            <div style={{
+              background:C.card, border:`1px solid ${C.border}`,
+              borderRadius:"12px", padding:"1.3rem 1.5rem",
+              transition:"border-color .22s, box-shadow .22s",
             }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              style={styles.modalClose}
-              onClick={() => setActiveProject(null)}
+              onMouseEnter={e=>{ e.currentTarget.style.borderColor=C.borderHov; e.currentTarget.style.boxShadow=C.shadowBlue; }}
+              onMouseLeave={e=>{ e.currentTarget.style.borderColor=C.border; e.currentTarget.style.boxShadow="none"; }}
             >
-              ✕
-            </button>
-            <span
-              style={{
-                ...styles.projectTag,
-                color: activeProject.color,
-                fontSize: "0.75rem",
-              }}
-            >
-              {activeProject.tag} · {activeProject.year}
-            </span>
-            <h2 style={styles.modalTitle}>{activeProject.title}</h2>
-            <p style={styles.modalDesc}>{activeProject.description}</p>
-            <div style={{ marginTop: "1.5rem" }}>
-              <div style={styles.skillGroup}>Technologies Used</div>
-              <div style={styles.techRowModal}>
-                {activeProject.tech.map((t) => (
-                  <span
-                    key={t}
-                    style={{
-                      ...styles.techChip,
-                      background: activeProject.color + "22",
-                      color: activeProject.color,
-                      border: `1px solid ${activeProject.color}44`,
-                    }}
-                  >
-                    {t}
-                  </span>
-                ))}
+              <div style={{ display:"flex", alignItems:"center", gap:".6rem", marginBottom:".6rem", flexWrap:"wrap" }}>
+                <span style={{
+                  background:"rgba(59,130,246,.1)", border:`1px solid rgba(59,130,246,.2)`,
+                  borderRadius:"20px", color:C.accent,
+                  fontSize:".65rem", fontWeight:"700", letterSpacing:".6px",
+                  padding:".18rem .6rem", textTransform:"uppercase",
+                }}>{item.year}</span>
+                <span style={{
+                  background:`${item.color}18`, border:`1px solid ${item.color}32`,
+                  borderRadius:"20px", color:item.color,
+                  fontSize:".58rem", fontWeight:"700",
+                  padding:".14rem .5rem", textTransform:"uppercase",
+                }}>{item.type}</span>
               </div>
+              <h4 style={{ color:C.textPri, fontSize:".96rem", fontWeight:"700", marginBottom:".3rem", fontFamily:"'Inter',system-ui" }}>{item.role}</h4>
+              <div style={{ color:C.textSec, fontSize:".83rem", marginBottom:".5rem" }}>{item.org}</div>
+              <p style={{ color:C.textMut, fontSize:".81rem", lineHeight:1.7, margin:0 }}>{item.desc}</p>
             </div>
           </div>
-        </div>
+        </FadeIn>
+      ))}
+    </div>
+  );
+}
+
+function InfoCard({ icon, label, val, action, actionLabel }) {
+  const [h, setH] = useState(false);
+  return (
+    <div onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{
+      display:"flex", alignItems:"center", gap:".85rem",
+      background: h ? C.cardHov : C.card,
+      border:`1px solid ${h ? C.borderHov : C.border}`,
+      borderRadius:"11px", padding:".88rem 1.1rem",
+      transition:"all .2s ease", cursor:"default", flexWrap:"wrap",
+    }}>
+      <div style={{
+        display:"flex", alignItems:"center", justifyContent:"center",
+        background:"rgba(59,130,246,.1)", border:`1px solid rgba(59,130,246,.18)`,
+        borderRadius:"8px", color:C.accent,
+        flexShrink:0, width:36, height:36,
+      }}>{icon}</div>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ color:C.textMut, fontSize:".64rem", fontWeight:"700", letterSpacing:".8px", textTransform:"uppercase", marginBottom:".14rem" }}>{label}</div>
+        <div style={{ color:C.textSec, fontSize:".85rem", fontWeight:"500", wordBreak:"break-all" }}>{val}</div>
+      </div>
+      {action && (
+        <button onClick={action} style={{
+          background:"rgba(59,130,246,.1)", border:`1px solid rgba(59,130,246,.2)`,
+          borderRadius:"6px", color:C.accentLt,
+          cursor:"pointer", fontSize:".65rem", fontWeight:"700",
+          padding:".2rem .6rem", textTransform:"uppercase",
+          fontFamily:"'Inter',system-ui", letterSpacing:".4px",
+        }}>{actionLabel}</button>
       )}
     </div>
   );
 }
 
-/* ────────────── STYLES ────────────── */
-const styles = {
-  root: {
-    fontFamily: "'Georgia', 'Times New Roman', serif",
-    background: "#111111",
-    color: "#e8e4dc",
-    minHeight: "100vh",
-    overflowX: "hidden",
-  },
-  nav: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "1rem 3rem",
-    background: "rgba(17,17,17,0.92)",
-    backdropFilter: "blur(12px)",
-    borderBottom: "1px solid #2a2a2a",
-  },
-  navLogo: {
-    fontFamily: "'Georgia', serif",
-    fontSize: "1.4rem",
-    fontWeight: "bold",
-    color: "#c9b99a",
-    cursor: "pointer",
-    letterSpacing: "0.1em",
-  },
-  navLinks: {
-    display: "flex",
-    gap: "2rem",
-  },
-  navLink: {
-    background: "none",
-    border: "none",
-    color: "#888",
-    fontSize: "0.85rem",
-    cursor: "pointer",
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
-    transition: "color 0.2s",
-    padding: "4px 0",
-  },
-  navLinkActive: {
-    color: "#c9b99a",
-    borderBottom: "1px solid #c9b99a",
-  },
-  burger: {
-    display: "none",
-    background: "none",
-    border: "none",
-    color: "#c9b99a",
-    fontSize: "1.3rem",
-    cursor: "pointer",
-  },
-  mobileMenu: {
-    position: "fixed",
-    top: "60px",
-    left: 0,
-    right: 0,
-    background: "#181818",
-    zIndex: 99,
-    display: "flex",
-    flexDirection: "column",
-    padding: "1rem",
-    borderBottom: "1px solid #2a2a2a",
-  },
-  mobileLink: {
-    background: "none",
-    border: "none",
-    color: "#e8e4dc",
-    fontSize: "1rem",
-    padding: "0.8rem 1rem",
-    cursor: "pointer",
-    textAlign: "left",
-    borderBottom: "1px solid #2a2a2a",
-  },
+function SocialPill({ icon, label, href }) {
+  const [h, setH] = useState(false);
+  return (
+    <a href={href} target="_blank" rel="noreferrer"
+      onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
+      style={{
+        display:"inline-flex", alignItems:"center", gap:".4rem",
+        background: h ? "rgba(59,130,246,.1)" : C.card,
+        border:`1px solid ${h ? C.borderHov : C.border}`,
+        borderRadius:"30px", color: h ? C.accentLt : C.textSec,
+        fontSize:".78rem", fontWeight:"500", padding:".42rem .92rem",
+        textDecoration:"none", transition:"all .2s ease",
+      }}
+    >{icon}{label}</a>
+  );
+}
 
-  /* HERO */
-  hero: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    padding: "8rem 8% 4rem",
-    position: "relative",
-    overflow: "hidden",
-    gap: "4rem",
-  },
-  heroBg: {
-    position: "absolute",
-    inset: 0,
-    background:
-      "radial-gradient(ellipse at 70% 50%, rgba(201,185,154,0.07) 0%, transparent 60%)",
-    pointerEvents: "none",
-  },
-  heroContent: {
-    maxWidth: "600px",
-    zIndex: 2,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    textAlign: "left",
-  },
-  heroTag: {
-    fontSize: "0.75rem",
-    letterSpacing: "0.2em",
-    textTransform: "uppercase",
-    color: "#c9b99a",
-    marginBottom: "1.5rem",
-    fontFamily: "'Georgia', serif",
-  },
-  heroName: {
-    fontSize: "clamp(3.5rem, 8vw, 7rem)",
-    fontWeight: "400",
-    lineHeight: 1,
-    color: "#f0ebe0",
-    margin: "0 0 1.5rem 0",
-    fontFamily: "'Georgia', serif",
-    letterSpacing: "-0.02em",
-  },
-  heroSub: {
-    fontSize: "1.05rem",
-    lineHeight: 1.8,
-    color: "#999",
-    maxWidth: "500px",
-    marginBottom: "2.5rem",
-  },
-  heroActions: {
-    display: "flex",
-    gap: "1rem",
-    marginBottom: "3rem",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-  },
-  heroMeta: {
-    display: "flex",
-    gap: "1.5rem",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-    fontSize: "0.8rem",
-    color: "#666",
-  },
-  heroArt: {
-    position: "relative",
-    width: "340px",
-    height: "340px",
-    flexShrink: 0,
-    zIndex: 2,
-    marginRight: "10vw",
-  },
-  artCircle1: {
-    position: "absolute",
-    inset: 0,
-    borderRadius: "50%",
-    border: "1px solid rgba(201,185,154,0.25)",
-    animation: "spin 20s linear infinite",
-  },
-  artCircle2: {
-    position: "absolute",
-    inset: "30px",
-    borderRadius: "50%",
-    border: "1px solid rgba(201,185,154,0.12)",
-    animation: "spin 14s linear infinite reverse",
-  },
-  artInitials: {
-    position: "absolute",
-    inset: "60px",
-    borderRadius: "50%",
-    background: "rgba(201,185,154,0.06)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "4rem",
-    color: "#c9b99a",
-    fontFamily: "'Georgia', serif",
-    letterSpacing: "0.05em",
-    border: "1px solid rgba(201,185,154,0.15)",
-  },
+function ContactForm() {
+  const [form, setForm] = useState({ name:"",email:"",subject:"",message:"" });
+  const [status, setStatus] = useState("idle");
 
-  /* BUTTONS */
-  btnPrimary: {
-    background: "#c9b99a",
-    color: "#111",
-    border: "none",
-    padding: "0.85rem 2rem",
-    fontSize: "0.85rem",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-    cursor: "pointer",
-    fontFamily: "'Georgia', serif",
-    textDecoration: "none",
-    display: "inline-block",
-    transition: "background 0.2s",
-  },
-  btnGhost: {
-    background: "transparent",
-    color: "#c9b99a",
-    border: "1px solid #c9b99a",
-    padding: "0.85rem 2rem",
-    fontSize: "0.85rem",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-    cursor: "pointer",
-    fontFamily: "'Georgia', serif",
-    transition: "background 0.2s",
-  },
+  const inpStyle = {
+    background:"rgba(15,23,42,.9)", border:`1.5px solid ${C.border}`,
+    borderRadius:"9px", color:C.textPri,
+    fontFamily:"'Inter',system-ui,sans-serif", fontSize:".87rem",
+    outline:"none", padding:".78rem 1rem", width:"100%",
+    transition:"border-color .2s, box-shadow .2s",
+  };
+  const focus = e => { e.target.style.borderColor=C.accent; e.target.style.boxShadow=`0 0 0 3px rgba(59,130,246,.1)`; };
+  const blur  = e => { e.target.style.borderColor=C.border; e.target.style.boxShadow="none"; };
+  const submit = e => {
+    e.preventDefault(); setStatus("sending");
+    setTimeout(()=>{ setStatus("sent"); setTimeout(()=>{ setStatus("idle"); setForm({name:"",email:"",subject:"",message:""}); },3000); },1200);
+  };
+  const LBL = ({ t }) => (
+    <label style={{ display:"block", fontSize:".68rem", fontWeight:"700", letterSpacing:".5px", color:C.textMut, textTransform:"uppercase", marginBottom:".4rem" }}>{t}</label>
+  );
 
-  /* SECTIONS */
-  section: {
-    padding: "6rem 5rem",
-    background: "#111111",
-  },
-  sectionHeader: {
-    display: "flex",
-    alignItems: "baseline",
-    gap: "1.5rem",
-    marginBottom: "3.5rem",
-    borderBottom: "1px solid #2a2a2a",
-    paddingBottom: "1.5rem",
-  },
-  sectionNum: {
-    fontSize: "0.75rem",
-    color: "#c9b99a",
-    fontFamily: "monospace",
-    letterSpacing: "0.1em",
-  },
-  sectionTitle: {
-    fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
-    fontWeight: "400",
-    color: "#f0ebe0",
-    margin: 0,
-    fontFamily: "'Georgia', serif",
-  },
+  return (
+    <div style={{ background:C.card, border:`1px solid ${C.border}`, borderRadius:"16px", overflow:"hidden", padding:"2.2rem", position:"relative" }}>
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:C.accent }}/>
+      <h3 style={{ fontSize:"1.18rem", fontWeight:"700", color:C.textPri, marginBottom:".3rem", fontFamily:"'Inter',system-ui" }}>Send a Message</h3>
+      <p style={{ fontSize:".83rem", color:C.textMut, marginBottom:"1.6rem" }}>I'll get back to you as soon as possible.</p>
+      <form onSubmit={submit}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:".85rem", marginBottom:"1rem" }}>
+          <div><LBL t="Name"/>  <input type="text"  placeholder="Your name"      value={form.name}    required onChange={e=>setForm({...form,name:e.target.value})}    onFocus={focus} onBlur={blur} style={inpStyle}/></div>
+          <div><LBL t="Email"/> <input type="email" placeholder="your@email.com" value={form.email}   required onChange={e=>setForm({...form,email:e.target.value})}   onFocus={focus} onBlur={blur} style={inpStyle}/></div>
+        </div>
+        <div style={{ marginBottom:"1rem" }}>
+          <LBL t="Subject"/>
+          <input type="text" placeholder="What's this about?" value={form.subject} onChange={e=>setForm({...form,subject:e.target.value})} onFocus={focus} onBlur={blur} style={inpStyle}/>
+        </div>
+        <div style={{ marginBottom:"1.2rem" }}>
+          <LBL t="Message"/>
+          <textarea rows={5} placeholder="Your message…" value={form.message} required onChange={e=>setForm({...form,message:e.target.value})} onFocus={focus} onBlur={blur} style={{...inpStyle,resize:"vertical"}}/>
+        </div>
+        <button type="submit" disabled={status!=="idle"} style={{
+          width:"100%", border:"none", borderRadius:"9px", color:"#fff",
+          background: status==="sent" ? C.green : C.accent,
+          cursor: status!=="idle" ? "default" : "pointer",
+          display:"flex", alignItems:"center", justifyContent:"center", gap:".5rem",
+          fontFamily:"'Inter',system-ui,sans-serif", fontSize:".88rem", fontWeight:"600",
+          padding:".9rem", transition:"background .3s ease",
+          boxShadow:"0 3px 12px rgba(59,130,246,.25)",
+        }}>
+          {status==="sent" ? "✓ Message Sent!" : status==="sending" ? "Sending…" : "Send Message →"}
+        </button>
+      </form>
+    </div>
+  );
+}
 
-  /* SKILLS */
-  skillsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "2rem",
-  },
-  skillCard: {
-    background: "#181818",
-    border: "1px solid #2a2a2a",
-    padding: "2rem",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    boxSizing: "border-box",
-  },
-  skillGroup: {
-    fontSize: "0.85rem",
-    fontWeight: "bold",
-    letterSpacing: "0.15em",
-    textTransform: "uppercase",
-    color: "#c9b99a",
-    marginBottom: "1.5rem",
-    fontFamily: "'Georgia', serif",
-  },
-  skillItems: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "0.6rem",
-  },
-  skillPill: {
-    background: "rgba(201, 185, 154, 0.05)",
-    border: "1px solid rgba(201, 185, 154, 0.15)",
-    color: "#d4c8b2",
-    padding: "0.4rem 1rem",
-    fontSize: "0.8rem",
-    borderRadius: "4px",
-    fontFamily: "monospace",
-  },
+function ProjectModal({ project, onClose }) {
+  return (
+    <div onClick={onClose} style={{
+      position:"fixed", inset:0, zIndex:200,
+      background:"rgba(0,0,0,.85)", backdropFilter:"blur(18px)",
+      display:"flex", alignItems:"center", justifyContent:"center", padding:"1.5rem",
+    }}>
+      <div onClick={e=>e.stopPropagation()} style={{
+        background:C.card, border:`1px solid ${C.borderHov}`,
+        borderRadius:"16px", maxWidth:"560px", width:"100%",
+        maxHeight:"88vh", overflow:"hidden", display:"flex", flexDirection:"column",
+        boxShadow:`0 40px 80px rgba(0,0,0,.6)`,
+      }}>
+        <div style={{
+          height:120, flexShrink:0, position:"relative", overflow:"hidden",
+          background:C.bgSec,
+          display:"flex", alignItems:"center", justifyContent:"center",
+        }}>
+          <div style={{ fontSize:"3.8rem", opacity:.1 }}>{project.icon}</div>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:project.color }}/>
+        </div>
+        <div style={{ padding:"1.7rem", overflowY:"auto", position:"relative" }}>
+          <button onClick={onClose} style={{
+            position:"absolute", top:".8rem", right:".8rem",
+            background:"rgba(255,255,255,.05)", border:`1px solid ${C.border}`,
+            color:C.textSec, width:30, height:30, borderRadius:"7px",
+            cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:".78rem",
+          }}>✕</button>
+          <span style={{
+            display:"inline-block",
+            background:"rgba(59,130,246,.1)", border:"1px solid rgba(59,130,246,.25)",
+            borderRadius:"20px", color:C.accentLt,
+            fontSize:".6rem", fontWeight:"700", letterSpacing:".5px",
+            padding:".2rem .62rem", textTransform:"uppercase", marginBottom:".9rem",
+          }}>{project.tag} · {project.year}</span>
+          <h2 style={{ fontSize:"1.4rem", fontWeight:"700", color:C.textPri, margin:"0 0 1rem", fontFamily:"'Inter',system-ui", lineHeight:1.3 }}>{project.title}</h2>
+          <p style={{ fontSize:".88rem", color:C.textMut, lineHeight:1.85, marginBottom:"1.5rem" }}>{project.description}</p>
+          <div style={{ fontSize:".6rem", letterSpacing:"2px", textTransform:"uppercase", color:C.textMut, marginBottom:".65rem", fontWeight:"700" }}>Technologies</div>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:".42rem" }}>
+            {project.tech.map(t=>(
+              <span key={t} style={{
+                background:"rgba(59,130,246,.1)", border:"1px solid rgba(59,130,246,.2)",
+                borderRadius:"7px", color:C.accentLt,
+                fontSize:".78rem", padding:".3rem .75rem", fontFamily:"monospace",
+              }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  /* PROJECTS */
-  projectsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-    gap: "1.5rem",
-  },
-  projectCard: {
-    background: "#181818",
-    border: "1px solid #2a2a2a",
-    padding: "2rem",
-    cursor: "pointer",
-    transition: "border-color 0.2s, transform 0.2s",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    boxSizing: "border-box",
-  },
-  projectTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "1rem",
-  },
-  projectTag: {
-    fontSize: "0.7rem",
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    fontWeight: "bold",
-  },
-  projectYear: {
-    fontSize: "0.75rem",
-    color: "#555",
-    fontFamily: "monospace",
-  },
-  projectTitle: {
-    fontSize: "1.05rem",
-    fontWeight: "400",
-    color: "#f0ebe0",
-    margin: "0 0 0.75rem 0",
-    fontFamily: "'Georgia', serif",
-    lineHeight: 1.4,
-  },
-  projectDesc: {
-    fontSize: "0.85rem",
-    color: "#777",
-    lineHeight: 1.7,
-    marginBottom: "1.25rem",
-  },
-  techRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "0.4rem",
-    marginBottom: "1rem",
-  },
-  techChip: {
-    background: "#222",
-    border: "1px solid #333",
-    color: "#888",
-    padding: "0.2rem 0.6rem",
-    fontSize: "0.72rem",
-    borderRadius: "2px",
-    fontFamily: "monospace",
-  },
-  viewMore: {
-    fontSize: "0.78rem",
-    letterSpacing: "0.05em",
-    fontFamily: "monospace",
-    marginTop: "auto",
-    paddingTop: "1.5rem",
-  },
+function Preloader() {
+  return (
+    <div style={{
+      position:"fixed", inset:0, background:C.bg, zIndex:9999,
+      display:"flex", alignItems:"center", justifyContent:"center",
+      flexDirection:"column", gap:"1.75rem",
+    }}>
+      <div style={{ fontSize:"2.6rem", fontWeight:"900", letterSpacing:"-.03em" }}>
+        <span style={{ color:C.accent }}>N</span>
+        <span style={{ color:C.textMut }}>P</span>
+      </div>
+      <div style={{
+        width:32, height:32,
+        border:`3px solid rgba(59,130,246,.15)`,
+        borderTop:`3px solid ${C.accent}`,
+        borderRadius:"50%", animation:"spin .8s linear infinite",
+      }}/>
+    </div>
+  );
+}
 
-  /* TIMELINE */
-  timeline: {
-    position: "relative",
-    paddingLeft: "2rem",
-    borderLeft: "1px solid #2a2a2a",
-  },
-  timelineItem: {
-    position: "relative",
-    marginBottom: "3rem",
-    paddingLeft: "2.5rem",
-  },
-  timelineDot: {
-    position: "absolute",
-    left: "-2.5rem",
-    top: "0.3rem",
-    width: "12px",
-    height: "12px",
-    borderRadius: "50%",
-    background: "#c9b99a",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timelineDotInner: {},
-  timelineBody: {},
-  timelineYear: {
-    fontSize: "0.7rem",
-    letterSpacing: "0.12em",
-    color: "#c9b99a",
-    textTransform: "uppercase",
-    fontFamily: "monospace",
-    marginBottom: "0.3rem",
-  },
-  timelineRole: {
-    fontSize: "1.1rem",
-    color: "#f0ebe0",
-    fontFamily: "'Georgia', serif",
-    marginBottom: "0.2rem",
-  },
-  timelineOrg: {
-    fontSize: "0.85rem",
-    color: "#888",
-    marginBottom: "0.6rem",
-  },
-  timelineDesc: {
-    fontSize: "0.85rem",
-    color: "#666",
-    lineHeight: 1.7,
-    maxWidth: "600px",
-  },
+/* ══════════════════ MAIN ══════════════════ */
+export default function Portfolio() {
+  const [ready, setReady]           = useState(false);
+  const [scrolled, setScrolled]     = useState(false);
+  const [activeSection, setSection] = useState("About");
+  const [menuOpen, setMenu]         = useState(false);
+  const [activeProject, setProject] = useState(null);
+  const [copied, setCopied]         = useState(false);
+  const { isMobile, isTablet }      = useViewport();
 
-  /* CONTACT */
-  contactCard: {
-    background: "#181818",
-    border: "1px solid #2a2a2a",
-    padding: "3rem",
-    maxWidth: "700px",
-    margin: "0 auto",
-  },
-  contactIntro: {
-    fontSize: "1.05rem",
-    color: "#999",
-    lineHeight: 1.8,
-    marginBottom: "2.5rem",
-    maxWidth: "500px",
-  },
-  contactItems: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-    marginBottom: "2.5rem",
-  },
-  contactRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  contactIcon: {
-    fontSize: "1.1rem",
-    width: "28px",
-  },
-  contactVal: {
-    fontSize: "0.9rem",
-    color: "#bbb",
-    flex: 1,
-  },
-  copyBtn: {
-    background: "none",
-    border: "1px solid #333",
-    color: "#c9b99a",
-    padding: "0.2rem 0.7rem",
-    fontSize: "0.72rem",
-    cursor: "pointer",
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
-    fontFamily: "'Georgia', serif",
-  },
-  contactActions: {
-    display: "flex",
-    gap: "1rem",
-  },
+  useEffect(() => { const t = setTimeout(()=>setReady(true),1500); return()=>clearTimeout(t); }, []);
+  useEffect(() => {
+    const fn = () => {
+      setScrolled(window.scrollY > 55);
+      const sects = NAV_LINKS.map(n=>({ id:n, el:document.getElementById(n) }));
+      for (let i=sects.length-1; i>=0; i--) {
+        if (sects[i].el && window.scrollY >= sects[i].el.offsetTop-130) { setSection(sects[i].id); break; }
+      }
+    };
+    window.addEventListener("scroll", fn);
+    return()=>window.removeEventListener("scroll", fn);
+  }, []);
 
-  /* FOOTER */
-  footer: {
-    padding: "2rem 5rem",
-    borderTop: "1px solid #2a2a2a",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: "#0d0d0d",
-  },
-  footerLogo: {
-    fontFamily: "'Georgia', serif",
-    fontSize: "1.2rem",
-    color: "#c9b99a",
-    letterSpacing: "0.1em",
-  },
-  footerText: {
-    fontSize: "0.78rem",
-    color: "#444",
-  },
+  const goTo = id => { document.getElementById(id)?.scrollIntoView({ behavior:"smooth" }); setMenu(false); };
+  const copy = ()  => { navigator.clipboard.writeText("nithirapeiris.me@gmail.com"); setCopied(true); setTimeout(()=>setCopied(false),2200); };
 
-  /* MODAL */
-  modalOverlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.8)",
-    backdropFilter: "blur(8px)",
-    zIndex: 200,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "2rem",
-  },
-  modal: {
-    background: "#181818",
-    border: "1px solid #2a2a2a",
-    padding: "2.5rem",
-    maxWidth: "580px",
-    width: "100%",
-    position: "relative",
-    maxHeight: "80vh",
-    overflowY: "auto",
-  },
-  modalClose: {
-    position: "absolute",
-    top: "1rem",
-    right: "1rem",
-    background: "none",
-    border: "none",
-    color: "#888",
-    fontSize: "1.1rem",
-    cursor: "pointer",
-  },
-  modalTitle: {
-    fontSize: "1.5rem",
-    fontWeight: "400",
-    color: "#f0ebe0",
-    fontFamily: "'Georgia', serif",
-    margin: "0.75rem 0 1rem 0",
-    lineHeight: 1.4,
-  },
-  modalDesc: {
-    fontSize: "0.95rem",
-    color: "#999",
-    lineHeight: 1.8,
-  },
-  techRowModal: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "0.5rem",
-    marginTop: "0.75rem",
-  },
-};
+  if (!ready) return <Preloader/>;
+
+  const W  = { margin:"0 auto", maxWidth:1440, padding: isMobile ? "0 1.2rem" : "0 4rem", width:"100%" };
+  const SP = isMobile ? "4.5rem 0" : "6rem 0";
+
+  return (
+    <div style={{ fontFamily:"'Inter',system-ui,sans-serif", background:C.bg, color:C.textPri, minHeight:"100vh", overflowX:"hidden" }}>
+
+      {/* ── NAV ── */}
+      <header style={{
+        position:"fixed", top:0, left:0, right:0, zIndex:1000,
+        padding: scrolled ? ".8rem 0" : "1.25rem 0",
+        background: scrolled ? "rgba(15,23,42,.93)" : "transparent",
+        backdropFilter: scrolled ? "blur(20px)" : "none",
+        borderBottom: scrolled ? `1px solid ${C.border}` : "1px solid transparent",
+        transition:"all .3s ease",
+      }}>
+        <div style={{ ...W, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <span onClick={()=>goTo("About")} style={{
+            cursor:"pointer", fontSize:"1.45rem", fontWeight:"900", letterSpacing:"-.03em",
+          }}>
+            <span style={{ color:C.accent }}>N</span>
+            <span style={{ color:C.textMut }}>P</span>
+          </span>
+
+          {!isTablet && (
+            <nav>
+              <ul style={{ display:"flex", gap:".15rem", listStyle:"none" }}>
+                {NAV_LINKS.map(l=>(
+                  <li key={l}><NavItem label={l} active={activeSection===l} onClick={()=>goTo(l)}/></li>
+                ))}
+              </ul>
+            </nav>
+          )}
+
+          {isTablet && (
+            <button onClick={()=>setMenu(!menuOpen)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", flexDirection:"column", gap:"5px", padding:4 }}>
+              {[0,1,2].map(i=>(
+                <span key={i} style={{
+                  background:C.textPri, borderRadius:2, display:"block", height:2, width:22,
+                  transition:"all .3s",
+                  transform: menuOpen ? (i===0 ? "translateY(7px) rotate(45deg)" : i===1 ? "scaleX(0)" : "translateY(-7px) rotate(-45deg)") : "none",
+                  opacity: menuOpen && i===1 ? 0 : 1,
+                }}/>
+              ))}
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* Mobile drawer */}
+      {isTablet && (
+        <div style={{
+          position:"fixed", top:0, right: menuOpen ? 0 : "-100%",
+          width:"min(280px,80vw)", height:"100vh",
+          background:"rgba(15,23,42,.97)", backdropFilter:"blur(24px)",
+          borderLeft:`1px solid ${C.border}`,
+          zIndex:999, padding:"5rem 1.5rem 2rem",
+          transition:"right .35s cubic-bezier(.4,0,.2,1)",
+        }}>
+          <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:".3rem" }}>
+            {NAV_LINKS.map(l=>(
+              <li key={l}>
+                <button onClick={()=>goTo(l)} style={{
+                  background: activeSection===l ? "rgba(59,130,246,.12)" : "none",
+                  border:"none", borderRadius:"9px",
+                  color: activeSection===l ? C.accentLt : C.textSec,
+                  cursor:"pointer", fontSize:".95rem", padding:".82rem 1.2rem",
+                  textAlign:"left", width:"100%", fontFamily:"'Inter',system-ui",
+                  transition:"all .2s",
+                }}>{l}</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* ══ ABOUT ══ */}
+      <section id="About" style={{
+        background:C.bg, minHeight:"100vh",
+        padding: isMobile ? "7rem 0 4.5rem" : "8rem 0 6rem",
+        position:"relative", overflow:"hidden",
+      }}>
+        {/* subtle dot grid bg */}
+        <div style={{
+          position:"absolute", inset:0, pointerEvents:"none",
+          backgroundImage:`radial-gradient(rgba(59,130,246,.07) 1px,transparent 0)`,
+          backgroundSize:"30px 30px",
+          WebkitMaskImage:"radial-gradient(ellipse 80% 90% at 50% 50%,#000 20%,transparent 100%)",
+          maskImage:"radial-gradient(ellipse 80% 90% at 50% 50%,#000 20%,transparent 100%)",
+        }}/>
+
+        <div style={{ ...W, position:"relative", zIndex:1 }}>
+          <div style={{
+            display:"grid",
+            gridTemplateColumns: isTablet ? "1fr" : "1fr 1fr",
+            gap: isTablet ? "2.5rem" : "5rem",
+            alignItems:"center",
+          }}>
+
+            {/* ─── LEFT — content ─── */}
+            <div style={{ display:"flex", flexDirection:"column", alignItems: isTablet ? "center" : "flex-start" }}>
+
+              {/* eyebrow */}
+              <span style={{
+                fontSize:".8rem", fontWeight:"500",
+                color:C.textMut, marginBottom:"1rem", display:"block",
+                textAlign: isTablet ? "center" : "left",
+              }}>Hi, I'm</span>
+
+              {/* name */}
+              <h1 style={{
+                fontSize:"clamp(3.4rem,5.8vw,5rem)", fontWeight:"900",
+                letterSpacing:"-.045em", lineHeight:1.0,
+                marginBottom:".65rem", fontFamily:"'Inter',system-ui",
+                textAlign: isTablet ? "center" : "left",
+              }}>
+                Nithira
+                <span style={{ display:"block", color:C.accent }}>Dinujaya</span>
+              </h1>
+
+              {/* typed role */}
+              <div style={{
+                fontSize:"clamp(1rem,2vw,1.25rem)", fontWeight:"500",
+                color:C.textSec, marginBottom:"1.5rem", minHeight:"1.9rem",
+                textAlign: isTablet ? "center" : "left",
+              }}>
+                <TypedText roles={TYPED_ROLES}/>
+              </div>
+
+              {/* accent bar */}
+              <div style={{
+                width:50, height:3, background:C.accent, borderRadius:2,
+                marginBottom:"1.6rem",
+                ...(isTablet ? { margin:"0 auto 1.6rem" } : {}),
+              }}/>
+
+              {/* bio */}
+              <p style={{
+                color:C.textSec, fontSize:"1rem", lineHeight:1.85,
+                marginBottom:"1.8rem",
+                textAlign: isTablet ? "center" : "left",
+                ...(isTablet ? { margin:"0 auto 1.8rem" } : {}),
+              }}>
+                CS undergraduate at University of Wolverhampton. I bridge the gap
+                between business requirements and technical execution — with a sharp
+                eye for quality and a love for clean systems.
+              </p>
+
+              {/* Currently — clean dot list, no card */}
+              <div style={{ marginBottom:"2rem" }}>
+                {[
+                  { dot:C.green,   title:"QA Technician",         sub:"Global Solutions International" },
+                  { dot:C.accent,  title:"B.Sc. Computer Science", sub:"University of Wolverhampton" },
+                  { dot:C.textMut, title:"Ragama, Sri Lanka",      sub:null },
+                ].map((item,i)=>(
+                  <div key={i} style={{
+                    display:"flex", alignItems:"flex-start", gap:".85rem",
+                    marginBottom: i < 2 ? ".75rem" : 0,
+                    justifyContent: isTablet ? "center" : "flex-start",
+                  }}>
+                    <div style={{
+                      width:8, height:8, borderRadius:"50%",
+                      background:item.dot, marginTop:".5rem", flexShrink:0,
+                    }}/>
+                    <div style={{ textAlign: isTablet ? "left" : "left" }}>
+                      <span style={{ fontSize:".9rem", fontWeight:"600", color:C.textPri }}>{item.title}</span>
+                      {item.sub && <span style={{ fontSize:".85rem", color:C.textMut }}> · {item.sub}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTAs */}
+              <div style={{ display:"flex", gap:".8rem", flexWrap:"wrap", marginBottom:"1.25rem", justifyContent: isTablet ? "center" : "flex-start" }}>
+                <Btn onClick={()=>goTo("Projects")}>View Projects →</Btn>
+                <Btn onClick={()=>goTo("Contact")} variant="ghost">Get in Touch</Btn>
+              </div>
+
+              {/* socials */}
+              <div style={{ display:"flex", gap:".55rem", justifyContent: isTablet ? "center" : "flex-start" }}>
+                <SocialBtn icon={<GithubIcon/>}   href="https://github.com/"/>
+                <SocialBtn icon={<LinkedInIcon/>} href="https://linkedin.com/"/>
+                <SocialBtn icon={<MailIcon/>}     href="mailto:nithirapeiris.me@gmail.com"/>
+              </div>
+            </div>
+
+            {/* ─── RIGHT — circular photo ─── */}
+            {!isTablet && (
+              <div style={{ display:"flex", justifyContent:"flex-end", alignItems:"center", height:"100%" }}>
+                <ProfilePhoto/>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* scroll hint */}
+        {!isMobile && (
+          <div onClick={()=>goTo("Skills")} style={{
+            position:"absolute", bottom:"2rem", left:"50%",
+            animation:"bobDown 2.2s ease-in-out infinite",
+            cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:".4rem",
+            color:C.textMut, fontSize:".65rem", letterSpacing:"1.5px", textTransform:"uppercase",
+          }}>
+            <div style={{ border:`1.5px solid rgba(59,130,246,.28)`, borderRadius:11, height:30, width:19, display:"flex", justifyContent:"center", paddingTop:3 }}>
+              <div style={{ width:2.5, height:6, background:C.accent, borderRadius:2, animation:"wheelScroll 2.2s ease-in-out infinite" }}/>
+            </div>
+            Scroll
+          </div>
+        )}
+      </section>
+
+      {/* ── SKILLS ── */}
+      <section id="Skills" style={{ background:C.bgSec, padding:SP }}>
+        <div style={W}>
+          <FadeIn><SectionHead eyebrow="What I Know" title="Skills &" highlight="Expertise" desc="Technical tools, methodologies, and domain knowledge I bring to every project."/></FadeIn>
+          <FadeIn delay={.07}>
+            <div style={{ display:"grid", gridTemplateColumns:`repeat(auto-fill,minmax(${isMobile?"98px":"115px"},1fr))`, gap:".85rem", marginBottom:"2.75rem" }}>
+              {TECH_SKILLS.map(s=><TechCard key={s.name} skill={s}/>)}
+            </div>
+          </FadeIn>
+          <FadeIn delay={.11}>
+            <div style={{ marginBottom:"2.75rem", textAlign:"center" }}>
+              <div style={{ display:"inline-flex", alignItems:"center", gap:".6rem", color:C.textMut, fontSize:".66rem", fontWeight:"700", letterSpacing:"2.5px", textTransform:"uppercase", marginBottom:"1.2rem" }}>
+                <span style={{ background:C.borderHov, display:"inline-block", height:1, width:20 }}/>
+                Tools &amp; Methodologies
+                <span style={{ background:C.borderHov, display:"inline-block", height:1, width:20 }}/>
+              </div>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:".5rem", justifyContent:"center" }}>
+                {TOOLS.map(t=><ToolPill key={t} label={t}/>)}
+              </div>
+            </div>
+          </FadeIn>
+          <FadeIn delay={.15}>
+            <p style={{ textAlign:"center", color:C.textSec, fontSize:".95rem", fontWeight:"700", marginBottom:"1.4rem" }}>Soft Skills</p>
+            <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2,1fr)", gap:".9rem", maxWidth:800, margin:"0 auto" }}>
+              {SOFT_SKILLS.map((s,i)=><SoftCard key={i} skill={s}/>)}
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ── PROJECTS ── */}
+      <section id="Projects" style={{ background:C.bg, padding:SP }}>
+        <div style={W}>
+          <FadeIn><SectionHead eyebrow="My Work" title="Featured" highlight="Projects" desc="Selected projects showcasing QA, analytics, and full-stack development."/></FadeIn>
+          <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(2,1fr)" : "repeat(3,1fr)", gap:"1.1rem", alignItems:"stretch" }}>
+            {PROJECTS.map((p,i)=>(
+              <FadeIn key={p.id} delay={i*.07} style={{ display:"flex", flexDirection:"column" }}>
+                <ProjectCard project={p} onDetails={()=>setProject(p)}/>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── EXPERIENCE ── */}
+      <section id="Experience" style={{ background:C.bgSec, padding:SP }}>
+        <div style={W}>
+          <FadeIn><SectionHead eyebrow="My Journey" title="Experience &" highlight="Education"/></FadeIn>
+          <ExpTimeline/>
+        </div>
+      </section>
+
+      {/* ── CONTACT ── */}
+      <section id="Contact" style={{ background:C.bg, padding:SP }}>
+        <div style={W}>
+          <FadeIn><SectionHead eyebrow="Get in Touch" title="Let's" highlight="Connect" desc="Have a project in mind or want to discuss opportunities? I'd love to hear."/></FadeIn>
+          <div style={{ display:"grid", gridTemplateColumns: isTablet ? "1fr" : "1fr 1.5fr", gap: isTablet ? "1.75rem" : "2.75rem", alignItems:"start" }}>
+            <FadeIn delay={.07}>
+              <div>
+                <h3 style={{ color:C.textPri, fontSize:"1.25rem", fontWeight:"700", marginBottom:".65rem", fontFamily:"'Inter',system-ui", lineHeight:1.35 }}>
+                  Let's build something great together.
+                </h3>
+                <p style={{ color:C.textMut, fontSize:".9rem", lineHeight:1.8, marginBottom:"1.6rem" }}>
+                  Whether you're looking for a QA specialist, business analyst,
+                  or a project partner — I'd love to connect.
+                </p>
+                <div style={{ display:"flex", flexDirection:"column", gap:".6rem", marginBottom:"1.75rem" }}>
+                  <InfoCard icon={<MailIcon/>}  label="Email"    val="nithirapeiris.me@gmail.com" action={copy} actionLabel={copied ? "✓ Copied" : "Copy"}/>
+
+                  <InfoCard icon={<PinIcon/>}   label="Location" val="Ragama, Sri Lanka"/>
+                </div>
+                <p style={{ color:C.textMut, fontSize:".65rem", fontWeight:"700", letterSpacing:"1.8px", textTransform:"uppercase", marginBottom:".8rem" }}>Social</p>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:".5rem" }}>
+                  <SocialPill icon={<GithubIcon/>}   label="GitHub"   href="https://github.com/"/>
+                  <SocialPill icon={<LinkedInIcon/>} label="LinkedIn" href="https://linkedin.com/"/>
+                </div>
+              </div>
+            </FadeIn>
+            <FadeIn delay={.13}><ContactForm/></FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer style={{ borderTop:`1px solid ${C.border}`, padding:"1.75rem 0 1.25rem" }}>
+        <div style={W}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:".75rem" }}>
+            <span style={{ fontSize:"1.25rem", fontWeight:"900", letterSpacing:"-.02em" }}>
+              <span style={{ color:C.accent }}>N</span>
+              <span style={{ color:C.textMut }}>P</span>
+            </span>
+            <span style={{ fontSize:".74rem", color:C.textMut }}>© 2025 Nithira Dinujaya · Built with React</span>
+            <span style={{ fontSize:".74rem", color:C.textMut }}>Ragama, Sri Lanka</span>
+          </div>
+        </div>
+      </footer>
+
+      {activeProject && <ProjectModal project={activeProject} onClose={()=>setProject(null)}/>}
+    </div>
+  );
+}
+
+function NavItem({ label, active, onClick }) {
+  const [h, setH] = useState(false);
+  return (
+    <button onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{
+      background: active ? "rgba(59,130,246,.12)" : h ? "rgba(255,255,255,.04)" : "none",
+      border:"none", borderRadius:"8px",
+      color: active ? C.accentLt : h ? C.textPri : C.textSec,
+      cursor:"pointer", fontFamily:"'Inter',system-ui,sans-serif",
+      fontSize:".85rem", fontWeight: active ? "500" : "400",
+      padding:".45rem .95rem", transition:"all .18s ease",
+    }}>{label}</button>
+  );
+}
