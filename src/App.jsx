@@ -22,7 +22,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App" data-version="1.0.1">
       <Header />
       <main>
         <Home />
