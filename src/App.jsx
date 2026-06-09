@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-import './App.css';
+import "./App.css";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App" data-version="1.0.1">
       <Header />
       <main>
         <Home />
@@ -32,4 +32,3 @@ function App() {
 }
 
 export default App;
-
