@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import profilePic from "./assets/pp.jpg";
 
 /* ══════════════════ PALETTE — No Gradients ══════════════════ */
 const C = {
@@ -223,8 +224,8 @@ function ProfilePhoto() {
         right:"-12px",
       }}/>
       <img
-        src="https://i.pravatar.cc/320?img=11"
-        alt="Profile"
+        src={profilePic}
+        alt="About profile photo"
         style={{
           width:332, height:332, borderRadius:"50%",
           objectFit:"cover",
